@@ -1,0 +1,10 @@
+{
+  "name": "snake-game",
+  "version": "0.0.1",
+  "description": "snake game",
+  "dependencies": {
+    "express": "^4.17.1",
+    "idb": "^4.0.4",
+    "path": "^0.12.7"
+  }
+}

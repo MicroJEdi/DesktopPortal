@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+
+        .selected-icon {
+            background-color: blue;
+        }
+
+      body {
+        position: relative;
+        z-index: 1000;
+        overflow: hidden;
+        background-image:url('background.jpg');
+        background-size: cover;
+      }
+
+      /* The element to apply the animation to */
+      .applicationWindow {
+        overflow: hidden;
+        display: inline-block;
+        height:auto;
+        width:auto;
+        position: absolute;
+        /*resize: both;*/
+        z-index: 2000;
+        opacity: 0.98;
+        background-color: #grey;
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently
+                              supported by Chrome, Opera and Firefox */
+        -webkit-transition-property: width; /* Safari */
+        -webkit-transition-duration: 1s; /* Safari */
+        transition-property: width;
+        transition-duration: 1s;
+      }
+
+      .overlay {
+          background-color: rgba(1, 1, 1, 0.7);
+          bottom: 0;
+          left: 0;
+          position: fixed;
+          right: 0;
+          top: 0;
+      }
+
+      .applicationWindwo.hideApplicationWindow {
+        min-width:0px;
+        width:0px;
+        opacity:0;
+      }
+
+
+      .applicationNavBar {
+        cursor:move;
+        opacity:0.85;
+      }
+
+      .applicationExit {
+        cursor:auto;
+      }
+
+      .topNav {
+        z-index: 2510;
+        opacity: 0.95;
+      }
+
+      .bottomNav {
+        z-index: 2500;
+        opacity: 0.8;
+        -webkit-transform: rotateX(70deg) translateY(90px); /* Safari prior 9.0 */
+        transform: rotateX(70deg) translateY(90px); /* Standard syntax */
+      }
+
+      .bottomNavIcon {
+        background: transparent;
+        -ms-transform: translateX(-175px) translateY(-115px) matrix(1.2, 0, 0, 3.25, 180, 0) scale3d(0.80,0.80,0.80); /* IE 9 */
+        -webkit-transform: translateX(-175px) translateY(-115px) matrix(1.2, 0, 0, 3.25, 180, 0) scale3d(0.80,0.80,0.80); /* Safari prior 9.0 */
+        transform: translateX(-175px) translateY(-115px) matrix(1.2, 0, 0, 3.25, 180, 0) scale3d(0.80,0.80,0.80); /* Standard syntax */  
+      }
+
+      .applicationHTML {
+        resize:both;
+        overflow-y:scroll;
+        overflow-x:hidden;
+        width:20vw;
+        height:20vh;
+      }
+
+    </style>
+
+    <scirpt type="text/javascript" src="finder.js"></scirpt>
+
+    <script>
+      var inverval;
+      function closeWindow(e) {
+        let element = e;
+        while(element.classList.contains("applicationWindow") == false)
+        {
+          element = element.parentElement;
+        }
+        element.remove();
+      }
+
+      function maximizeWindow(e) {
+        let element = e;
+        while(element.classList.contains("applicationWindow") == false)
+        {
+          element = element.parentElement;
+        }
+        $(element).css('top', $(".topNav").outerHeight() + "px");
+        $(element).css('left', 0 + "px");
+        $(element).css('height', $("body").height()-$(".topNav").outerHeight() + "px");
+        $(element).css('width', $("body").outerWidth() + "px");
+      }
+
+      function updateTime() {
+        let d = new Date();
+        let display = d.toDateString()+" "+(parseInt(d.getHours())%12)+":"+((parseInt(d.getMinutes()) < 10) ? "0" + d.getMinutes() : d.getMinutes())+":"+d.getSeconds()+" "+((d.getHours() > 12) ? "PM" : "AM");
+        $("#timeElement").text(display);
+      }
+
+      window.addEventListener('load', (event) => {
+        interval = setInterval(function(){updateTime();}, 1000);
+      });
+      
+      var processNumber = 0;
+
+      function openApplication(appName) {
+        if(appName == 'finder')
+        {
+          fetch("finder.js").then(res => res.text()).then(text => {
+            let applicationDiv = document.createElement("script");
+            applicationDiv.innerHTML = text;
+            applicationDiv.firstChild.id = "scriptProcessNumber"+processNumber++;  
+            $("body")[0].appendChild(applicationDiv);
+          });
+
+          fetch("finder.html").then(res => res.text()).then(text => {
+            let applicationDiv = document.createElement("div");
+            applicationDiv.innerHTML = applicationWindowStart+"finder"+applicationWindowMiddle1+"Finder"+applicationWindowMiddle2+text+applicationWindowEnd;
+            applicationDiv.firstChild.id = "htmlProcessNumber"+processNumber++;  
+            $("body")[0].appendChild(applicationDiv.firstChild);
+            draggableElements($(".applicationWindow")[$(".applicationWindow").length-1]);
+          });
+        }
+        else if(appName == 'trash')
+        {
+          fetch("trash.html").then(res => res.text()).then(text => {
+            let applicationDiv = document.createElement("div");
+            applicationDiv.innerHTML = applicationWindowStart+"trash"+applicationWindowMiddle1+"Trash"+applicationWindowMiddle2+text+applicationWindowEnd;
+            applicationDiv.firstChild.id = "processNumber"+processNumber++;  
+            $("body")[0].appendChild(applicationDiv.firstChild);
+            draggableElements($(".applicationWindow")[$(".applicationWindow").length-1]);
+          });
+        }
+      }
+
+      let applicationWindowStart =    "<div class='applicationWindow shadow card border-0'>\
+        <nav class='navbar navbar-dark bg-dark applicationNavBar m-0 p-0 pb-1 pl-1'>\
+          <span class='navbar-brand align-items-baseline m-0 mr-auto p-0 h1 pl-1'><img class='shadow rounded pr-2' height='20px;' src='";
+      let applicationWindowMiddle1 = "-icon.png' /><span class=''>";
+      let applicationWindowMiddle2 = "</span></span>\
+          <span class='btn btn-outline-light btn-sm navbar-toggler-right applicationExit m-0 p-0 mr-1' onclick='maximizeWindow(this)'>🔲</span>\
+          <span class='btn btn-outline-light btn-sm navbar-toggler-right applicationExit m-0 p-0 mr-1' onclick='closeWindow(this)'>✖</span>\
+        </nav>\
+          <div class='applicationHTML'>";
+      let applicationWindowEnd = "</div>\
+      </div>";
+
+    </script>
+
+    <title>Hello, world!</title>
+  </head>
+
+  <body class="container-fluid" style="height:100vh;">  
+
+    <nav class="navbar navbar-expand bg-light fixed-top topNav shadow p-0"> 
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-0 pr-1 align-content-center" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <img src="Bear.png" width="30" height="30" class="m-0 p0" alt="">
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Finder
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            File
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Edit
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            View
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Go
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Window
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <button class="nav-link btn-light btn btn-sm m-0 p-1" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Help
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+      </ul>
+
+      <button id="timeElement" class="btn btn-sm btn-light btn-sm ml-auto m-0 p-1">Welcome!</button>
+    </nav>
+
+    <nav class="container fixed-bottom align-content-center justify-content-center text-center bottomNav">
+      <div class="d-inline-flex bg-light">
+        <div class="m-auto flex-row shadow">
+          <button class="btn btn-sm btn-light m-0 p-0" onclick="openApplication('finder')"><img class="shadow rounded bottomNavIcon" height="80px;" src="finder-icon.png" /></button>
+          <button class="btn btn-sm btn-light m-0 p-0"><img class="shadow rounded-circle bottomNavIcon" height="80px;" src="safari-icon.png" /></button>
+          <button class="btn btn-sm btn-light m-0 p-0"><img class="shadow rounded-circle bottomNavIcon" height="80px;" src="photos-icon.png" /></button>
+          <button class="btn btn-sm btn-light m-0 p-0"><img class="shadow rounded bottomNavIcon" height="80px;" src="settings-icon.png" /></button>
+          <button class="btn btn-sm btn-light m-0 p-0" onclick="openApplication('trash')"><img class="shadow rounded-circle bottomNavIcon" height="80px;" src="trash-icon.png" /></button>
+        </div>
+      </div>
+    </nav>
+
+
+
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script>
+      //Make the DIV element draggagle:
+      var notifyParent = function() {
+        alert("parents");
+      }
+
+      var elements = $(".applicationWindow");
+      var maxZIndex = 2000;
+
+      var draggableElements = dragElements(elements);
+
+      function dragElements(elements) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, currentIndex = 0, mouseOverElement = 0;
+        for(let i = 0; i < elements.length; i++) 
+        {
+            elements[i].onmousedown = dragMouseDown;
+        }
+
+        function addElement(e)
+        {
+          $(e).css('top', "100px");
+          $(e).css('left', "10px");
+          $(e).css('z-index', (maxZIndex+10)+"px");
+          elements.push(e);
+          currentIndex = elements.length-1;
+          elements[currentIndex].onmousedown = dragMouseDown;
+          //elements[currentIndex].onmouseover = overElement;
+          //elements[currentIndex].onmouseout = outElement;
+        }
+
+        function outElement(e) {
+          mouseOverElement = -1;
+          document.onmousedown = null;
+        }
+
+        function overElement(e) {
+          for(let i = 0; i < elements.length; i++)
+          {
+              if(e.path.includes(elements[i]))
+              {
+                mouseOverElement = i;
+                document.onmousedown = dragMouseDown;            
+              }
+          }
+        }
+        
+
+        function dragMouseDown(e) {
+          currentIndex = mouseOverElement;
+          e = e || window.event;
+          //e.preventDefault();
+          // get the mouse cursor position at startup:
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          for(let i = 0; i < elements.length; i++)
+          {
+              //if(e.path.includes(elements[i]))
+              if(i == currentIndex)
+              {
+                //currentIndex = i;
+                $(elements[i]).css('z-index', maxZIndex);
+              }
+              else
+              {
+                $(elements[i]).css('z-index', $(elements[i]).css('z-index')-10);
+              }
+          }
+          if((!e.path[0].classList.contains('applicationExit')) && (e.path[0].classList.contains('navbar') || e.path[0].parentElement.classList.contains('navbar')))
+          {
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+          }
+          document.onmouseup = closeDragElement;
+        }
+
+        function elementDrag(e) {
+          e = e || window.event;
+          e.preventDefault();
+          // calculate the new cursor position:
+          pos1 = pos3 - e.clientX;
+          pos2 = pos4 - e.clientY;
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          // set the element's new position:
+          if(((elements[currentIndex].offsetTop - pos2) > $(".topNav").outerHeight()) && (elements[currentIndex].offsetTop + $(elements[currentIndex]).outerHeight() - pos2) < $("body").height())
+          {
+            $(elements[currentIndex]).css('top', (elements[currentIndex].offsetTop - pos2) + "px");
+          }
+          if(((elements[currentIndex].offsetLeft - pos1) > 0) && (elements[currentIndex].offsetLeft + $(elements[currentIndex]).outerWidth() - pos1) < $("body").outerWidth())
+          {
+            $(elements[currentIndex]).css('left',(elements[currentIndex].offsetLeft - pos1) + "px");
+          }
+        }
+
+        function closeDragElement() {
+          /* stop moving when mouse button is released:*/
+          document.onmouseup = null;
+          document.onmousemove = null;
+          if((elements[currentIndex].offsetTop + $(elements[currentIndex]).outerHeight()) >= $("body").height())
+          {
+            $(elements[currentIndex]).css('height', (parseInt($("body").height()) - (elements[currentIndex].offsetTop)) + "px");
+          }
+        }
+        return addElement;
+      }
+    </script>
+
+  </body>
+</html>
